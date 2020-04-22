@@ -16,6 +16,8 @@ namespace ContosoMasks.ServiceHost
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            SiteConfiguration.StaticAssetRoot = configuration["StaticAssetRoot"];
+            SiteConfiguration.CDNVersion = configuration["CDNVersion"];
         }
 
         public IConfiguration Configuration { get; }
