@@ -26,7 +26,11 @@ steps:
     archiveType: 'zip'    
     archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip' 
 
-- task: PublishBuildArtifacts@1
+- task: AzureRmWebAppDeployment@4
   inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip' 
-    artifactName: 'drop'
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'Visual Studio Enterprise(23d8c84a-ad22-409f-8fe6-d81e2439b47a)'
+    appType: 'webApp'
+    WebAppName: 'contosomasks'
+    packageForLinux: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+
