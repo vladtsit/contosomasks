@@ -77,7 +77,8 @@
 
             <h3 class="my-3">Diagnostics</h3>
             <ul>
-                <li>Current Server Time: @DateTimeOffset.Now</li>
+                <li>Current Server Time: <span>@DateTimeOffset.UtcNow.ToString("ddd, dd MMMM yyyy HH':'mm':'ss 'GMT'")</span></li>
+                <li>Current Local Time: <span id="localDateTime"></span></li>
                 <li>Client IP: @Context.Connection.RemoteIpAddress.ToString()</li>
                 @if (!string.IsNullOrEmpty(xForwardedFor))
                 {
@@ -136,3 +137,13 @@
     </div>
 
 </div>
+
+
+@section scripts {
+    <script>
+        $(function () {
+            $('#localDateTime').text(new Date().toUTCString());
+        });
+    </script>
+}
+
