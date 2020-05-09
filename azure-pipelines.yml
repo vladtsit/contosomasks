@@ -26,8 +26,8 @@ steps:
 - task: AzureRmWebAppDeployment@4
   inputs:
     ConnectionType: 'AzureRM'
-    azureSubscription: 'Visual Studio Enterprise(23d8c84a-ad22-409f-8fe6-d81e2439b47a)'
+    azureSubscription: 'Microsoft Azure Internal Consumption (andywahr)(84bcbb63-5ce7-47d6-9481-0ddd39d8d250)'
     appType: 'webApp'
     WebAppName: 'contosomasks'
-    packageForLinux: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
 

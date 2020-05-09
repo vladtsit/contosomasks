@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,12 @@ namespace ContosoMasks.ServiceHost
     public class CDNTagHelper : TagHelper
     {
         public const string CDNLinkAttributeName = "cdnify";
+        private bool useCDN = false;
+
+        public CDNTagHelper(IHttpContextAccessor contextFactory)
+        {
+            useCDN = contextFactory.HttpContext.Request.Query.ContainsKey("cdn");
+        }
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
@@ -26,8 +33,7 @@ namespace ContosoMasks.ServiceHost
             }
         }
 
-
-        private static void UpdateCDNAttr(TagHelperContext context, TagHelperOutput output, string tag, string cdnEndpoint)
+        private void UpdateCDNAttr(TagHelperContext context, TagHelperOutput output, string tag, string cdnEndpoint)
         {
             string url = string.Empty;
             var foundOutputAttr = output.Attributes.SafeWhere(attr => attr.Name.EqualsOI(tag));
@@ -67,7 +73,7 @@ namespace ContosoMasks.ServiceHost
 
             string formattedUrl;
 
-            if (string.IsNullOrEmpty(cdnEndpoint))
+            if (string.IsNullOrEmpty(cdnEndpoint) || !useCDN)
             {
                 formattedUrl = url.TrimStart('~');
             }

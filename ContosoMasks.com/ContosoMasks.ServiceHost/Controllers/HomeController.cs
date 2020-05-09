@@ -18,15 +18,24 @@ namespace ContosoMasks.ServiceHost.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Index(bool frontdoor = false, bool cdn = false)
         {
+            if ( frontdoor )
+            {
+                string url = string.IsNullOrEmpty(SiteConfiguration.FrontDoorURL) ? "/" : SiteConfiguration.FrontDoorURL;
+                if ( cdn )
+                { 
+                    return Redirect(url + "?cdn=true");
+                }
+                else
+                {
+                    return Redirect(url);
+                }
+            }
+
             return View();
         }
-
-        //public IActionResult Privacy()
-        //{
-        //    return View();
-        //}
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

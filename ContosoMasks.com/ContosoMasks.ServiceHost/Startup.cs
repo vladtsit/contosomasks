@@ -18,6 +18,8 @@ namespace ContosoMasks.ServiceHost
             Configuration = configuration;
             SiteConfiguration.StaticAssetRoot = configuration["StaticAssetRoot"];
             SiteConfiguration.CDNVersion = configuration["CDNVersion"];
+            SiteConfiguration.FrontDoorURL = configuration["FrontDoorURL"];
+            
         }
 
         public IConfiguration Configuration { get; }
@@ -26,6 +28,7 @@ namespace ContosoMasks.ServiceHost
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddHttpContextAccessor();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
