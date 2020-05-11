@@ -44,13 +44,66 @@
                 }
             }
         },
+                {
+            "name": "[concat(variables('domainName'), '/awverify.www')]",
+            "type": "Microsoft.Network/dnszones/CNAME",
+            "apiVersion": "2018-05-01",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/dnsZones', variables('domainName'))]"
+            ],
+            "properties": {
+                "TTL": 3600,
+                "CNAMERecord": {
+                    "cname": "[concat('awverify.',variables('appServiceFQDN'))]"
+                }
+            }
+        },
+        {
+            "name": "[concat(variables('domainName'), '/donotdelete')]",
+            "type": "Microsoft.Network/dnszones/TXT",
+            "apiVersion": "2018-05-01",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/dnsZones', variables('domainName'))]"
+            ],
+            "properties": {
+                "TTL": 3600,
+                "TXTRecords": [
+                        {
+                            "value": [
+                            "Used to link for lab"
+                            ]
+                        }
+                    ]
+            }
+        },
+        {
+            "apiVersion": "2015-01-01",
+            "name": "delegateSubDomain",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[concat('Microsoft.Network/dnsZones/', variables('domainName'), '/CNAME/www')]",
+                "[concat('Microsoft.Network/dnsZones/', variables('domainName'), '/CNAME/awverify.www')]",
+                "[concat('Microsoft.Network/dnsZones/', variables('domainName'), '/TXT/donotdelete')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat('https://contosomasks-lab-mgmt.azurewebsites.net/api/registerStudent/', parameters('sitename'), '/', reference(variables('domainName')).NameServers[0], '/', reference(variables('domainName')).NameServers[1], '/', reference(variables('domainName')).NameServers[2], '/', reference(variables('domainName')).NameServers[3])]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                }
+            }
+        },
         {
             "name": "[variables('appServicePlan')]",
             "type": "Microsoft.Web/serverfarms",
             "apiVersion": "2018-02-01",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/dnsZones', variables('domainName'))]"
+                "[resourceId('Microsoft.Resources/deployments', 'delegateSubDomain')]"
             ],
             "sku": {
                 "name": "S1",
@@ -124,7 +177,7 @@
         },
         {
             "apiVersion": "2015-01-01",
-            "name": "linkedTemplate",
+            "name": "sslHostnameBindingTemplate",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
                 "[concat('Microsoft.Web/sites/', variables('appServiceName'))]",
