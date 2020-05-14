@@ -4,10 +4,16 @@
     ViewData["Title"] = "Home";
     Microsoft.Extensions.Primitives.StringValues xForwardedForHeader;
     string xForwardedFor = "";
+    string xAzureFDID = "";
 
     if (Context.Request.Headers.TryGetValue("X-Forwarded-For", out xForwardedForHeader))
     {
         xForwardedFor = xForwardedForHeader.SafeFirstOrDefault();
+    }
+
+    if (Context.Request.Headers.TryGetValue("X-Azure-FDID", out xForwardedForHeader))
+    {
+        xAzureFDID = xForwardedForHeader.SafeFirstOrDefault();
     }
 }
 
@@ -83,6 +89,10 @@
                 @if (!string.IsNullOrEmpty(xForwardedFor))
                 {
                     <li>X-Forwarded-For: @xForwardedFor</li>
+                }
+                @if (!string.IsNullOrEmpty(xAzureFDID))
+                {
+                    <li>X-Azure-FDID: @xAzureFDID</li>
                 }
             </ul>
         </div>
