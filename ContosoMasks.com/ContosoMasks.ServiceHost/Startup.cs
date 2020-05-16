@@ -55,7 +55,8 @@ namespace ContosoMasks.ServiceHost
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{action=Index}/{id?}",
+                    defaults: new { controller = "Home" });
             });
         }
     }
