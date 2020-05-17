@@ -53,6 +53,20 @@ namespace ContosoMasks.ServiceHost.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Message()
         {
+            string cdnEndPoint = SiteConfiguration.StaticAssetRoot;
+
+            if (string.IsNullOrEmpty(cdnEndPoint))
+            {
+                cdnEndPoint = "/";
+            }
+            else
+            {
+                cdnEndPoint = cdnEndPoint.TrimEnd('/') + "/";
+            }
+
+            this.Response.Headers.Add("X-ContosoMasks-StaticEndpoint", cdnEndPoint);
+
+
             return View();
         }
 
