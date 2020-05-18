@@ -10,5 +10,6 @@ namespace ContosoMasks.ServiceHost
         public static string StaticAssetRoot = "";
         public static string CDNVersion = "";
         public static string FrontDoorURL = "";
+        public static string StorageAccount = "";
     }
 }
