@@ -44,6 +44,7 @@
         <tr>
             <th scope="col">Region</th>
             <th scope="col">Total Duration</th>
+            <th scope="col">Total Requests</th>
             <th scope="col">Connecting</th>
             <th scope="col">Receiving</th>
             <th scope="col">Sending</th>
@@ -52,17 +53,39 @@
         </tr>
         @foreach (var region in run.Regions.OrderBy(r => r.Key))
         {
-            IEnumerable<Stat> prevRegion = null;
-            previous?.Regions.TryGetValue(region.Key, out prevRegion);
+            IEnumerable<Stat> prevRun = null;
+            long prevCount = 0;
+            long curCount = run.RegionRequests[region.Key];
+            previous?.Regions.TryGetValue(region.Key, out prevRun);
+            previous?.RegionRequests.TryGetValue(region.Key, out prevCount);
+            string prevCountDelta = "";
+
+            if (prevCount > 0)
+            {
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+                double delta = 1d - ((double)curCount / (double)prevCount);
+                if (delta > 0)
+                {
+                    sb.Append($" -{Math.Abs(delta).ToString("P")}");
+                }
+                else
+                {
+                    sb.Append($" +{Math.Abs(delta).ToString("P")}");
+                }
+
+                prevCountDelta = sb.ToString();
+            }
 
             <tr>
                 <td>@region.Key</td>
-                <th scope="row">@Html.Raw(formatStat(region.Value, prevRegion, "http_req_duration"))</th>
-                <td>@Html.Raw(formatStat(region.Value, prevRegion, "http_req_connecting"))</td>
-                <td>@Html.Raw(formatStat(region.Value, prevRegion, "http_req_receiving"))</td>
-                <td>@Html.Raw(formatStat(region.Value, prevRegion, "http_req_sending"))</td>
-                <td>@Html.Raw(formatStat(region.Value, prevRegion, "http_req_tls_handshaking"))</td>
-                <td>@Html.Raw(formatStat(region.Value, prevRegion, "http_req_waiting"))</td>
+                <th scope="row">@Html.Raw(formatStat(region.Value, prevRun, "http_req_duration"))</th>
+                <th scope="row">@curCount @Html.Raw(prevCountDelta)</th>
+                <td>@Html.Raw(formatStat(region.Value, prevRun, "http_req_connecting"))</td>
+                <td>@Html.Raw(formatStat(region.Value, prevRun, "http_req_receiving"))</td>
+                <td>@Html.Raw(formatStat(region.Value, prevRun, "http_req_sending"))</td>
+                <td>@Html.Raw(formatStat(region.Value, prevRun, "http_req_tls_handshaking"))</td>
+                <td>@Html.Raw(formatStat(region.Value, prevRun, "http_req_waiting"))</td>
             </tr>
         }
 

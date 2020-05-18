@@ -19,7 +19,7 @@ namespace ContosoMasks.ServiceHost
             SiteConfiguration.StaticAssetRoot = configuration["StaticAssetRoot"];
             SiteConfiguration.CDNVersion = configuration["CDNVersion"];
             SiteConfiguration.FrontDoorURL = configuration["FrontDoorURL"];
-            SiteConfiguration.StorageAccount = "storageaccountrgcon89f8";
+            SiteConfiguration.StorageAccount = configuration["StorageAccount"];
         }
 
         public IConfiguration Configuration { get; }

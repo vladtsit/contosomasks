@@ -13,43 +13,44 @@ namespace ContosoMasks.ServiceHost.Models
             ID = id;
             Url = url;
             Regions = new Dictionary<string, IEnumerable<Stat>>();
-            RegionCount = new Dictionary<string, int>();
+            RegionRequests = new Dictionary<string, long>();
         }
 
         public void AddFile(string region, string file)
         {
-            var stats = Stat.ParseFile(file);
+            (var stats, var numberOfReqs) = Stat.ParseFile(file);
+
             IEnumerable<Stat> alreadyThere;
 
             if ( !Regions.TryGetValue(region, out alreadyThere))
             {
                 Regions[region] = stats;
-                RegionCount[region] = 1;
+                RegionRequests[region] = numberOfReqs;
             }
             else
             {
-                int regionCount = RegionCount[region];
+                long regionRequests = RegionRequests[region];
 
                 alreadyThere.SafeForEach(curStat =>
                 {
                     var newStat = stats.SafeFirstOrDefault(s => s.Name.EqualsOI(curStat.Name));
                     if ( newStat != null )
                     {
-                        curStat.Average = ((curStat.Average * regionCount) + newStat.Average) / (regionCount + 1);
-                        curStat.Minimum = ((curStat.Minimum * regionCount) + newStat.Minimum) / (regionCount + 1);
-                        curStat.Median = ((curStat.Median * regionCount) + newStat.Median) / (regionCount + 1);
-                        curStat.Maximum = ((curStat.Maximum * regionCount) + newStat.Maximum) / (regionCount + 1);
-                        curStat.Percentile90 = ((curStat.Percentile90 * regionCount) + newStat.Percentile90) / (regionCount + 1);
-                        curStat.Percentile95 = ((curStat.Percentile95 * regionCount) + newStat.Percentile95) / (regionCount + 1);
+                        curStat.Average = ((curStat.Average * regionRequests) + (newStat.Average * numberOfReqs)) / (regionRequests + numberOfReqs);
+                        curStat.Minimum = ((curStat.Minimum * regionRequests) + (newStat.Minimum * numberOfReqs)) / (regionRequests + numberOfReqs);
+                        curStat.Median = ((curStat.Median * regionRequests) + (newStat.Median * numberOfReqs)) / (regionRequests + numberOfReqs);
+                        curStat.Maximum = ((curStat.Maximum * regionRequests) + (newStat.Maximum * numberOfReqs)) / (regionRequests + numberOfReqs);
+                        curStat.Percentile90 = ((curStat.Percentile90 * regionRequests) + (newStat.Percentile90 * numberOfReqs)) / (regionRequests + numberOfReqs);
+                        curStat.Percentile95 = ((curStat.Percentile95 * regionRequests) + (newStat.Percentile95 * numberOfReqs)) / (regionRequests + numberOfReqs);
                     }
                 });
 
-                RegionCount[region] = regionCount + 1;
+                RegionRequests[region] = regionRequests + numberOfReqs;
             }
         }
 
         public Dictionary<string, IEnumerable<Stat>> Regions { get; set; }
-        private Dictionary<string, int> RegionCount { get; set; }
+        public Dictionary<string, long> RegionRequests { get; set; }
         public string ID { get; set; }
         public string Url { get; set; }
     }
@@ -57,15 +58,24 @@ namespace ContosoMasks.ServiceHost.Models
     public class Stat
     {
         static Regex LINE = new Regex(@"^\s+([^\s^\.]+)\.+:\s+avg=([\d\.]+\S+)\s+min=([\d\.]+\S+)\s+med=([\d\.]+\S+)\s+max=([\d\.]+\S+)\s+p\(90\)=([\d\.]+\S+)\s+p\(95\)=([\d\.]+\S+)\s*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        static Regex REQSLINE = new Regex(@"^\s+http_reqs\.+:\s+([\d]+)\s+\S+\s*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         static Regex NUMBER = new Regex(@"^([\d\.]+)([^\d^\.]+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase); 
         static Regex MINNUMBER = new Regex(@"^([\d]+)m([\d]+)s$", RegexOptions.Compiled | RegexOptions.IgnoreCase); 
 
-        public static IEnumerable<Stat>  ParseFile(string file)
+        public static (IEnumerable<Stat>, long)  ParseFile(string file)
         {
-            var lines = file.Split('\n').Where(line => LINE.IsMatch(line)).ToList();
-                
-                
-            return lines.Select(line =>
+            var lines = file.Split('\n');
+            var statLines = lines.Where(line => LINE.IsMatch(line)).ToList();
+            var totalReq = lines.SafeFirstOrDefault(line => REQSLINE.IsMatch(line));
+            long totalReqs = 0;
+
+            if ( !string.IsNullOrEmpty(totalReq))
+            {
+                var matches = REQSLINE.Match(totalReq);
+                totalReqs = long.Parse(matches.Groups[1].Value);
+            }
+
+            return (statLines.Select(line =>
             {
                 var matches = LINE.Match(line);
                 return new Stat()
@@ -78,7 +88,7 @@ namespace ContosoMasks.ServiceHost.Models
                     Percentile90 = toMicroSeconds(matches.Groups[6].Value),
                     Percentile95 = toMicroSeconds(matches.Groups[7].Value),
                 };
-            }).ToList();
+            }).ToList(), totalReqs);
         }
 
         private static long toMicroSeconds(string val)
@@ -116,5 +126,6 @@ namespace ContosoMasks.ServiceHost.Models
         public long Maximum { get; set; }
         public long Percentile90 { get; set; }
         public long Percentile95 { get; set; }
+
     }
 }
