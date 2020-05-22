@@ -8,12 +8,12 @@
 
     if (Context.Request.Headers.TryGetValue("X-Forwarded-For", out xForwardedForHeader))
     {
-        xForwardedFor = xForwardedForHeader.SafeFirstOrDefault();
+        xForwardedFor = xForwardedForHeader.SafeFirstOrDefault().Replace("104.57.183.10", "104.57.XXX.XXX");
     }
 
     if (Context.Request.Headers.TryGetValue("X-Azure-FDID", out xForwardedForHeader))
     {
-        xAzureFDID = xForwardedForHeader.SafeFirstOrDefault();
+        xAzureFDID = xForwardedForHeader.SafeFirstOrDefault().Replace("104.57.183.10", "104.57.XXX.XXX");
     }
 }
 
@@ -86,7 +86,7 @@
             <ul>
                 <li>Current Server Time: <span>@DateTimeOffset.UtcNow.ToString("ddd, dd MMMM yyyy HH':'mm':'ss 'GMT'")</span></li>
                 <li>Current Local Time: <span id="localDateTime"></span></li>
-                <li>Client IP: @Context.Connection.RemoteIpAddress.ToString()</li>
+                <li>Client IP: @Context.Connection.RemoteIpAddress.ToString().Replace("104.57.183.10", "104.57.XXX.XXX")</li>
                 @if (!string.IsNullOrEmpty(xForwardedFor))
                 {
                     <li>X-Forwarded-For: @xForwardedFor</li>
