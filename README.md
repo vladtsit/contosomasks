@@ -1,4 +1,6 @@
-# contosomasks
+## ContosoMasks repisitory
 
+We are happy to announce the release of ContosoMask, a fictitious retail company selling masks. Who wants masks that look like a hospital? Why not have FUN!
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fandywahr%2Fcontosomasks%2Fmaster%2Fazuredeploy.json)
+This project is built using .NET Core 3.1 LTS Framework
+
